@@ -1,37 +1,22 @@
 site_name: HFT Notes
-site_description: Открытый глоссарий по высокочастотной и алгоритмической торговле
+site_description: Открытый глоссарий по высокочастотной торговле
 site_url: https://USERNAME.github.io/hft-notes/
 
 repo_name: USERNAME/hft-notes
 repo_url: https://github.com/USERNAME/hft-notes
 edit_uri: edit/main/docs/
 
+hooks:
+  - hooks/section_index.py
+
 theme:
   name: material
   language: ru
 
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Включить тёмную тему
-
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Включить светлую тему
-
   features:
-    - navigation.sections
-    - navigation.indexes
     - navigation.top
     - navigation.tracking
+    - navigation.path
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -63,5 +48,6 @@ markdown_extensions:
 
   - pymdownx.tasklist:
       custom_checkbox: true
-hooks:
-  - hooks/section_index.py
+
+  - toc:
+      permalink: true

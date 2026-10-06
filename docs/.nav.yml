@@ -1,5 +1,12 @@
+ignore:
+  - "**/index.md"
+
+sort:
+  direction: asc
+  type: natural
+  by: filename
+  sections: first
+
 nav:
-  - Главная: index.md
-  - Инфраструктура: infrastructure
-  - Исследование стратегий: strategy-research
-  - Машинное обучение: ml
+  - index.md
+  - "*/"
