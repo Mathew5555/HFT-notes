@@ -1,0 +1,67 @@
+site_name: HFT Notes
+site_description: Открытый глоссарий по высокочастотной и алгоритмической торговле
+site_url: https://USERNAME.github.io/hft-notes/
+
+repo_name: USERNAME/hft-notes
+repo_url: https://github.com/USERNAME/hft-notes
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: ru
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Включить тёмную тему
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Включить светлую тему
+
+  features:
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.tracking
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search:
+      lang:
+        - ru
+        - en
+  - awesome-nav
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+
+  - pymdownx.details
+
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+
+  - pymdownx.tasklist:
+      custom_checkbox: true
+hooks:
+  - hooks/section_index.py

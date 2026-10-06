@@ -1,0 +1,5 @@
+nav:
+  - Главная: index.md
+  - Инфраструктура: infrastructure
+  - Исследование стратегий: strategy-research
+  - Машинное обучение: ml
