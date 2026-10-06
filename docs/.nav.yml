@@ -8,4 +8,5 @@ sort:
 
 nav:
   - index.md
+  - Как дополнить проект: contributing.md
   - "*/"
