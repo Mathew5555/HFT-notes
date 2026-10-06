@@ -14,6 +14,7 @@ theme:
   language: ru
 
   features:
+    - navigation.indexes
     - navigation.top
     - navigation.tracking
     - navigation.path

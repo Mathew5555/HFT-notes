@@ -21,18 +21,15 @@ NUMBER_PREFIX_PATTERN = re.compile(
 )
 
 
-def read_page_information(path: Path) -> tuple[str, str]:
+def read_title(path: Path) -> str:
     content = path.read_text(encoding="utf-8")
-
     title = ""
-    description = ""
 
     front_matter_match = FRONT_MATTER_PATTERN.match(content)
 
     if front_matter_match:
         metadata = yaml.safe_load(front_matter_match.group(1)) or {}
         title = str(metadata.get("title", "")).strip()
-        description = str(metadata.get("description", "")).strip()
 
     if not title:
         h1_match = H1_PATTERN.search(content)
@@ -44,9 +41,7 @@ def read_page_information(path: Path) -> tuple[str, str]:
         title = re.sub(r"^\d+[-_ ]*", "", path.stem)
         title = title.replace("-", " ").replace("_", " ").capitalize()
 
-    title = NUMBER_PREFIX_PATTERN.sub("", title)
-
-    return title, description
+    return NUMBER_PREFIX_PATTERN.sub("", title)
 
 
 def section_pages(directory: Path) -> list[Path]:
@@ -58,21 +53,16 @@ def section_pages(directory: Path) -> list[Path]:
 
 
 def build_section_index(directory: Path) -> str:
+    pages = section_pages(directory)
+
+    if not pages:
+        return "_В этом разделе пока нет статей._"
+
     items = []
 
-    for chapter_number, path in enumerate(section_pages(directory), start=1):
-        title, description = read_page_information(path)
-        label = f"{chapter_number}. {title}"
-
-        if description:
-            items.append(
-                f"- [{label}]({path.name}) — {description}"
-            )
-        else:
-            items.append(f"- [{label}]({path.name})")
-
-    if not items:
-        return "_В этом разделе пока нет глав._"
+    for chapter_number, path in enumerate(pages, start=1):
+        title = read_title(path)
+        items.append(f"{chapter_number}. [{title}]({path.name})")
 
     return "\n".join(items)
 
@@ -83,8 +73,12 @@ def number_navigation_section(section, docs_directory: Path) -> None:
     for item in section.children:
         if item.is_page:
             source_path = docs_directory / str(item.file.src_uri)
-            title, _ = read_page_information(source_path)
 
+            # index.md — главная страница раздела, а не глава.
+            if source_path.name.lower() in {"index.md", "readme.md"}:
+                continue
+
+            title = read_title(source_path)
             item.title = f"{chapter_number}. {title}"
             chapter_number += 1
 

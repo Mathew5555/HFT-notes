@@ -1,5 +1,4 @@
-ignore:
-  - "**/index.md"
+use_index_title: true
 
 sort:
   direction: asc
