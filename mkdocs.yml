@@ -1,9 +1,9 @@
 site_name: HFT Notes
 site_description: Открытый глоссарий по высокочастотной торговле
-site_url: https://USERNAME.github.io/hft-notes/
+site_url: https://mathew5555.github.io/hft-notes/
 
-repo_name: USERNAME/hft-notes
-repo_url: https://github.com/USERNAME/hft-notes
+repo_name: Mathew5555/hft-notes
+repo_url: https://github.com/Mathew5555/hft-notes
 edit_uri: edit/main/docs/
 
 hooks:
