@@ -1,0 +1,8 @@
+/* Keep long page titles compact, without a permalink on a separate line. */
+.md-typeset h1 {
+  margin-bottom: 0.6em;
+}
+
+.md-typeset h1 .headerlink {
+  display: none;
+}

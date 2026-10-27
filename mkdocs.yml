@@ -9,6 +9,9 @@ edit_uri: edit/main/docs/
 hooks:
   - hooks/section_index.py
 
+extra_css:
+  - stylesheets/extra.css
+
 theme:
   name: material
   language: ru
