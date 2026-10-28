@@ -8,6 +8,7 @@ edit_uri: edit/main/docs/
 
 hooks:
   - hooks/section_index.py
+  - hooks/preview.py
 
 extra_css:
   - stylesheets/extra.css

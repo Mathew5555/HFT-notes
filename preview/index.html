@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#b8d4ed">
+  <meta name="description" content="HFT Notes — пространство конспектов о машинном обучении и торговых системах.">
+  <title>Пространство знаний · HFT Notes</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="catalog.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="sky-light" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="HFT Notes — на главную"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 8v16M16 4v24M27 8v16M5 16h22"/></svg><span>HFT<span class="brand-light"> Notes</span></span></a>
+    <a class="classic-link" href="../">Классическая версия <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main">
+    <section id="home-view" class="home-view" aria-labelledby="home-title">
+      <p class="eyebrow">ЗНАНИЯ БЕЗ ГРАНИЦ</p>
+      <h1 id="home-title">Пространство<br><span>знаний</span><span class="title-dot">.</span></h1>
+      <p class="intro">От первой идеи — к пониманию.<br>Конспекты о данных, рынках и торговых системах.</p>
+      <nav id="section-buttons" class="section-buttons" aria-label="Разделы конспектов"></nav>
+      <p class="home-hint">Выбери направление и начни исследовать <span aria-hidden="true">↓</span></p>
+    </section>
+    <section id="topics-view" class="topics-view" aria-labelledby="topics-title" hidden>
+      <button class="back-button" id="back" type="button"><span aria-hidden="true">←</span> Все направления</button>
+      <div class="topics-heading"><div><p class="eyebrow" id="section-label">КОНСПЕКТЫ</p><h1 id="topics-title" tabindex="-1"></h1></div><span class="section-mark" id="section-mark" aria-hidden="true"></span></div>
+      <div class="list-toolbar"><p id="topic-count"></p><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="topic-search" type="search" placeholder="Найти тему" aria-label="Найти тему в разделе" autocomplete="off"></label></div>
+      <ol id="topic-list" class="topic-list"></ol>
+      <p id="empty-search" class="empty-state" hidden>Такой темы пока нет. Попробуй другое название.</p>
+      <p id="empty-section" class="empty-state" hidden>Этот раздел ещё формируется. Скоро здесь появятся первые конспекты.</p>
+    </section>
+    <noscript><p class="noscript">Для анимированного меню нужен JavaScript. <a href="../">Открыть конспекты в классической версии →</a></p></noscript>
+  </main>
+  <footer class="site-footer"><span>HFT NOTES <span class="footer-divider">/</span> ОТКРЫТАЯ БАЗА ЗНАНИЙ</span><button id="motion-toggle" type="button" aria-pressed="false"><span class="motion-icon" aria-hidden="true">Ⅱ</span> <span id="motion-label">Остановить облака</span></button></footer>
+</body>
+</html>
