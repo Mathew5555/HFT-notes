@@ -85,17 +85,11 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && currentSection) location.hash = ''; });
   route(true);
 
-  // Layered cloud volumes; each layer has its own depth and pointer parallax.
-  const canvas = document.getElementById('sky');
-  const ctx = canvas.getContext('2d');
+  // Keep the cloud texture in compositor layers instead of repainting a canvas.
+  const sky = document.getElementById('sky');
   const toggle = document.getElementById('motion-toggle');
-  let paused = motionQuery.matches, width = 0, height = 0, time = 0, last = 0, frame = 0;
-  const pointer = {x:0,y:0,targetX:0,targetY:0,zoom:1,targetZoom:1,energy:0};
-  // A photographic cloud sprite keeps the fine vapor edges at every scale.
-  const cloudTexture = new Image();
-  let textureReady = false;
-  cloudTexture.addEventListener('load', () => { textureReady = true; draw(); });
-  cloudTexture.src = 'assets/cloud-bank.png';
+  let paused = motionQuery.matches, pointerFrame = 0, hoverTimer = 0;
+  const pointer = {x: 0, y: 0};
   const clouds = [
     {x:-.53,y:-.33,w:1.12,h:.88,v:.026,a:.80,s:0,depth:.35},
     {x:.55,y:-.32,w:1.13,h:.88,v:-.024,a:.88,s:2,depth:.45},
@@ -104,60 +98,73 @@
     {x:-.46,y:.56,w:1.36,h:.85,v:.033,a:1,s:2,depth:1.5},
     {x:.24,y:.65,w:1.35,h:.82,v:-.030,a:1,s:1,depth:1.8}
   ];
-  function draw() {
-    if (!ctx) return;
-    ctx.clearRect(0,0,width,height);
-    if (!textureReady) return;
-    for (const cloud of clouds) {
-      const drift = Math.sin(time * cloud.v) * width * .035;
-      const zoom = 1+(pointer.zoom-1)*cloud.depth;
-      const x=cloud.x*width+drift-pointer.x*70*cloud.depth;
-      const y=cloud.y*height+Math.sin(time*.035+cloud.s)*6-pointer.y*46*cloud.depth;
-      ctx.globalAlpha = cloud.a;
-      const drawX=width/2+(x-width/2)*zoom, drawY=height/2+(y-height/2)*zoom;
-      const drawW=cloud.w*width*zoom, drawH=cloud.h*height*zoom;
-      ctx.save();
-      if (cloud.s===1) { ctx.translate(drawX+drawW,drawY); ctx.scale(-1,1); }
-      else { ctx.translate(drawX,drawY); }
-      ctx.drawImage(cloudTexture,0,0,drawW,drawH);
-      ctx.restore();
-    }
-    ctx.globalAlpha = 1;
+  const drifts = clouds.map(cloud => {
+    const layer = document.createElement('div');
+    layer.className = 'cloud-layer';
+    Object.assign(layer.style, {
+      left: `${cloud.x * 100}%`, top: `${cloud.y * 100}%`,
+      width: `${cloud.w * 100}%`, height: `${cloud.h * 100}%`, opacity: cloud.a,
+      transformOrigin: `${(.5 - cloud.x) / cloud.w * 100}% ${(.5 - cloud.y) / cloud.h * 100}%`
+    });
+    layer.style.setProperty('--depth', cloud.depth);
+    layer.style.setProperty('--hover-scale', 1 + .1 * cloud.depth);
+    const image = document.createElement('img');
+    image.src = 'assets/cloud-bank.png';
+    image.alt = ''; image.draggable = false; image.decoding = 'async';
+    layer.append(image); sky.append(layer);
+    const flip = cloud.s === 1 ? -1 : 1;
+    // A closed loop with eased extrema approximates the previous sine drift.
+    const positions = [0, 1, 0, -1, 0];
+    const frames = positions.map((position, index) => ({
+      transform: `translate3d(${position * Math.sign(cloud.v) * 3.5}vw, ${Math.sin(index * Math.PI / 2 + cloud.s) * 6}px, 0) scaleX(${flip})`,
+      easing: 'cubic-bezier(.37,0,.63,1)'
+    }));
+    const animation = image.animate(frames, {duration: 2 * Math.PI / Math.abs(cloud.v) * 1000, iterations: Infinity});
+    animation.pause();
+    return animation;
+  });
+  function applyPointer() {
+    pointerFrame = 0;
+    sky.style.setProperty('--pointer-x', `${-pointer.x * 70}px`);
+    sky.style.setProperty('--pointer-y', `${-pointer.y * 46}px`);
   }
-  document.addEventListener('pointermove',event=>{
-    if (event.pointerType==='touch') return;
-    const x=(event.clientX/innerWidth-.5)*2, y=(event.clientY/innerHeight-.5)*2;
-    pointer.energy=Math.min(1,pointer.energy+Math.hypot(x-pointer.targetX,y-pointer.targetY)*5);
-    pointer.targetX=x; pointer.targetY=y;
-  },{passive:true});
-  document.documentElement.addEventListener('pointerleave',()=>{pointer.targetX=pointer.targetY=0;});
-  function interactive(target) {return target instanceof Element && !!target.closest('.section-button,.topic-row a,.back-button,.classic-link');}
-  document.addEventListener('pointerover',event=>{if(interactive(event.target)) pointer.targetZoom=1.10;});
-  document.addEventListener('pointerout',event=>{if(!interactive(event.relatedTarget)) pointer.targetZoom=1;});
-  document.addEventListener('focusin',event=>{if(interactive(event.target)) pointer.targetZoom=1.10;});
-  document.addEventListener('focusout',()=>{pointer.targetZoom=1;});
-  function resize() {
-    const dpr = Math.min(devicePixelRatio || 1, 1.5);
-    width = innerWidth; height = innerHeight;
-    canvas.width = Math.round(width*dpr); canvas.height = Math.round(height*dpr);
-    if (ctx) ctx.setTransform(dpr,0,0,dpr,0,0);
-    draw();
+  function schedulePointer() {
+    if (!paused && !document.hidden && !pointerFrame) pointerFrame = requestAnimationFrame(applyPointer);
   }
-  function tick(now) {
-    if (paused || document.hidden) { frame = 0; return; }
-    if (now-last >= 1000/30) { const dt=Math.min((now-last)/1000,.1), ease=1-Math.exp(-dt*3.5); time+=dt*(1+pointer.energy*3); pointer.energy*=Math.exp(-dt*2); last=now; pointer.x+=(pointer.targetX-pointer.x)*ease; pointer.y+=(pointer.targetY-pointer.y)*ease; pointer.zoom+=(pointer.targetZoom-pointer.zoom)*ease; draw(); }
-    frame = requestAnimationFrame(tick);
+  document.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch' || paused) return;
+    pointer.x = (event.clientX / innerWidth - .5) * 2;
+    pointer.y = (event.clientY / innerHeight - .5) * 2;
+    schedulePointer();
+  }, {passive: true});
+  document.documentElement.addEventListener('pointerleave', () => {
+    pointer.x = pointer.y = 0;
+    schedulePointer();
+  });
+  const interactiveSelector = '.section-button,.topic-row a,.back-button,.classic-link';
+  function updateHover() {
+    hoverTimer = 0;
+    const overControl = document.querySelector(`${interactiveSelector.split(',').map(s => `${s}:hover`).join(',')},${interactiveSelector.split(',').map(s => `${s}:focus-visible`).join(',')}`);
+    sky.classList.toggle('is-interactive', !paused && !document.hidden && !!overControl);
   }
+  function scheduleHover() {
+    // Coalesce focusout/focusin and pointerout/pointerover into one target.
+    if (!hoverTimer) hoverTimer = setTimeout(updateHover, 0);
+  }
+  ['pointerover', 'pointerout', 'focusin', 'focusout'].forEach(type => document.addEventListener(type, scheduleHover));
   function updateMotion() {
     toggle.setAttribute('aria-pressed', String(paused));
     document.getElementById('motion-label').textContent = paused ? 'Включить движение' : 'Остановить облака';
     toggle.querySelector('.motion-icon').textContent = paused ? '▷' : 'Ⅱ';
-    if (paused) { cancelAnimationFrame(frame); frame = 0; }
-    else if (!frame && !document.hidden) { last = performance.now(); frame = requestAnimationFrame(tick); }
+    const running = !paused && !document.hidden;
+    sky.classList.toggle('is-paused', !running);
+    drifts.forEach(animation => running ? animation.play() : animation.pause());
+    if (!running) { cancelAnimationFrame(pointerFrame); pointerFrame = 0; }
+    else schedulePointer();
+    updateHover();
   }
   toggle.addEventListener('click', () => { paused = !paused; updateMotion(); });
   document.addEventListener('visibilitychange', updateMotion);
-  motionQuery.addEventListener('change', e => { paused = e.matches; updateMotion(); });
-  window.addEventListener('resize', resize);
-  resize(); updateMotion();
+  motionQuery.addEventListener('change', event => { paused = event.matches; updateMotion(); });
+  updateMotion();
 })();
